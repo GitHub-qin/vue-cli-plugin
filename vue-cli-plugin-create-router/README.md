@@ -31,18 +31,18 @@ create-router 默认配置基本可以满足日常需要，如需更改可以通
 // vue.config.js
 module.exports = {
   pluginOptions: {
-	  createRouterConfig: {
-	      // 工作目录（默认: src）
-		  cwd: path.resolve(process.cwd(), './src'),
-		  // 项目页面地址（默认: views）
-		  projectPath: `views`,
-		  // 生成路由文件的名称（默认: index）
-		  outputFileName: 'index'
-	      // 开启路由异步模式（默认: false）
-		  async: true,
-		  // 以监听模式运行 serve 服务，监听 projectPath 目录下文件的 created，removed，changed （默认: false）
-		  watch: true
-	  }
+       createRouterConfig: {
+          // 工作目录（默认: src）
+          cwd: path.resolve(process.cwd(), './src'),
+          // 项目页面地址（默认: views）
+          projectPath: `views`,
+          // 生成路由文件的名称（默认: index）
+          outputFileName: 'index'
+          // 开启路由异步模式（默认: false）
+          async: true,
+          // 以监听模式运行 serve 服务，监听 projectPath 目录下文件的 created，removed，changed （默认: false）
+          watch: true
+      }
    }
 }
 ```
@@ -75,29 +75,29 @@ module.exports = {
 <router-config>
 {
     // 注释说明文字
-	note: 'Layout 页面9999',
-	// 开启路由异步模式（默认: false）
-	async: true,
-	// 以监听模式运行 serve 服务，监听 projectPath 目录下文件的 created，removed，changed （默认: false）
-	watch: true,
-	
-	// 以下参数请参考 [vue-router 官网](https://router.vuejs.org/zh/ "vue-router 官网")
-	path: '/',
-	alias: '',
-	redirect: '',
-	meta: {
-		code...
-	},
-	beforeEnter: function(to, from, next) {
-	    code...
+    note: 'Layout 页面9999',
+    // 开启路由异步模式（默认: false）
+    async: true,
+    // 以监听模式运行 serve 服务，监听 projectPath 目录下文件的 created，removed，changed （默认: false）
+    watch: true,
+
+    // 以下参数请参考 [vue-router 官网](https://router.vuejs.org/zh/ "vue-router 官网")
+    path: '/',
+    alias: '',
+    redirect: '',
+    meta: {
+        code...
+    },
+    beforeEnter: function(to, from, next) {
+        code...
     }
 }
 </router-config>
 
 <template>
     <div>
-	    hello
-	</div>
+        hello
+    </div>
 </template>
 ```
 
@@ -106,7 +106,7 @@ module.exports = {
 启动项目后生成文件`router/index.js`
 
 ```
-// Layout 页面 
+// Layout 页面
 const viewsLayout = () => import('@/views/layout')
 import viewsLayoutHome from '@/views/layout/home'
 import viewsLayoutId from '@/views/layout/_id'
@@ -134,9 +134,9 @@ export default [
     redirect: {
         name: "/test"
     },
-    beforeEnter: function(to, from, next) {  
-	    next()  
-	}
+    beforeEnter: function(to, from, next) {
+        next()
+    }
   }
 ]
 ```

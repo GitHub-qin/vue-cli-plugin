@@ -1,6 +1,6 @@
 # @xohu/vue-cli-plugin-create-router
 
-> vue-cli 的 create-router 插件
+> vue-cli3 的 create-router 插件
 
 - **使用**
 
@@ -17,15 +17,14 @@
 - **`vue-cli-service createRouter`**
 
   ```
-  使用：vue-cli-service lint [options]
+  使用：vue-cli-service createRouter [options]
 
   选项：
-
     --async 开启路由异步模式，实现路由组件的懒加载 (默认不开启)
   ```
 
 ## 配置
-create-router 默认配置基本可以满足日常需要，如需更改可以通过 `vue.config.js` 中的 `pluginOptions` 进行配置。
+默认配置基本可以满足日常需求，如需更改可以通过 `vue.config.js` 中的 `pluginOptions.createRouterConfig` 进行配置
 
 ``` js
 // vue.config.js
@@ -69,19 +68,19 @@ module.exports = {
 推荐使用 **`<router-config>`** 标签来配置动态路由
 
 使用 **`<router-config>`** 标签
-默认配置基本可以满足日常需要，如需更改可以通过每个页面灵活单独配置
+默认配置基本可以满足日常需求，如需更改可以通过每个页面灵活单独配置
 ```
 # views/layout.vue
 <router-config>
 {
     // 注释说明文字
-    note: 'Layout 页面9999',
+    note: 'Layout 页面',
     // 开启路由异步模式（默认: false）
     async: true,
-    // 以监听模式运行 serve 服务，监听 projectPath 目录下文件的 created，removed，changed （默认: false）
+    // 监听当前页面内容的 changed （默认: false）
     watch: true,
 
-    // 以下参数请参考 [vue-router 官网](https://router.vuejs.org/zh/ "vue-router 官网")
+    // 以下参数请参考 [vue-router 官网](https://router.vuejs.org/zh/)
     path: '/',
     alias: '',
     redirect: '',
@@ -153,8 +152,6 @@ import router from '@/router'
 router = new Router({
   routes: router
 })
-
-Vue.config.productionTip = false
 
 new Vue({
   router,

@@ -2,7 +2,7 @@
 
 > vue-cli3 的 create-router 插件
 
-- **使用**
+- **安装**
 
   ```
   vue add @xohu/create-router
@@ -21,6 +21,13 @@
 
   选项：
     --async 开启路由异步模式，实现路由组件的懒加载 (默认不开启)
+  ```
+
+  ```
+  ## 注
+  create-router 插件对 vue-cli-service serve 增加了 --watch 模式
+  可以运行 npx vue-cli-service help serve 查看所有选项
+  如有需要，可以监听模式运行 serve 服务，监听 projectPath 目录下文件的 created，removed，changed
   ```
 
 ## 配置

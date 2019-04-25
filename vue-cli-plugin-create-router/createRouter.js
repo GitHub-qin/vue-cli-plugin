@@ -89,10 +89,6 @@ module.exports = class CreateRouter {
 
         return this.createRoutes(files)
     }
-
-    hasArgv (argv) {
-        return process.argv.some(v => v == argv);
-    }
      
     getPageInfo (p) {
         const pageFile = this.resolveFile(p, { cwd: this.options.cwd })
@@ -301,6 +297,10 @@ module.exports = class CreateRouter {
     getDate () {
         const date = new Date()
         return `${ date.getFullYear() }-${ date.getMonth() + 1 }-${ date.getDate() } ${ date.getHours() }:${ date.getMinutes() }:${ date.getSeconds() }`
+    }
+
+    hasArgv (argv) {
+        return process.argv.some(v => v == argv)
     }
     
     writeFile (dirname, fileName, content) {

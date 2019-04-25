@@ -68,7 +68,7 @@ module.exports = {
 推荐使用 **`<router-config>`** 标签来配置动态路由
 
 使用 **`<router-config>`** 标签
-默认配置基本可以满足日常需求，如需更改可以通过每个页面灵活单独配置
+默认配置基本可以满足日常需求，如需更改可以通过每个页面灵活单独配置，更多路由介绍请查看 [vue-router 官网](https://router.vuejs.org/zh/)
 ```
 # views/layout.vue
 <router-config>
@@ -80,7 +80,7 @@ module.exports = {
     // 监听当前页面内容的 changed （默认: false）
     watch: true,
 
-    // 以下参数请参考 [vue-router 官网](https://router.vuejs.org/zh/)
+    // 以下参数请参考 vue-router 官网
     path: '/',
     alias: '',
     redirect: '',

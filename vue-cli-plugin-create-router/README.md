@@ -105,6 +105,18 @@ module.exports = {
         hello
     </div>
 </template>
+
+<script>
+export default {
+    name: 'layout',
+    mounted() {
+        this.$nextTick(() => {
+            // 获取 <router-config> 标签的内容
+            console.log(this.$options._router)
+        });
+    }
+}
+</script>
 ```
 
 `<route-config>` 包含一个 `json` 的内容, 其中字段会同步到生成的 `router/index.js` 路由配置文件

@@ -94,15 +94,17 @@ module.exports = class CreateRouter {
         const pageFile = this.resolveFile(p, { cwd: this.options.cwd })
         const pageTemplate = vueTemplate.parseComponent(pageFile)
         const customBlocks = pageTemplate.customBlocks.find(b => b.type === 'router-config')
+        let info = { ...this.pageOptions };
         try {
-            return customBlocks ? { ...this.pageOptions, ...eval('('+ customBlocks.content +')') } : this.pageOptions
+            info = customBlocks ? { ...this.pageOptions, ...eval('('+ customBlocks.content +')') } : this.pageOptions
         } catch (error) {
-            throw {
-                message: 
+            console.log(
                 `  - error: ${ chalk.red('Error in router-config format') }` + 
-                `  pages: ${ chalk.cyan(path.join(this.options.cwd, p)) }`
-            }
+                `  pages: ${ chalk.cyan(p) }`
+            )
         }
+
+        return info
     }
     
     createRoutes (files) {
@@ -330,16 +332,14 @@ module.exports = class CreateRouter {
             const json = fs.readFileSync(path.resolve(options.cwd, fileName), 'utf8')
             return json;
         } catch (err) {
-            throw {
-                message: `  - resolveFile: ${ chalk.red(err)}`
-            }
+            console.log(`  - resolveFile: ${ chalk.red(err)}`)
         }
     }
 
     run () {
         /*
         if (!this.initOptions) {
-            console.log(`  - Set the ${chalk.cyan('pluginOptions > autoRouter')} parameter in ${chalk.cyan('vue.config.js')}`)
+            console.log(`  - Set the ${chalk.cyan('pluginOptions > createRouterConfig')} parameter in ${chalk.cyan('vue.config.js')}`)
             process.exit()
             return
         }
@@ -360,7 +360,7 @@ module.exports = class CreateRouter {
     
             this.writeFile(dirname, fileName, content)
         }).catch(error => {
-            console.log(error.message);
+            console.log(error);
         })
     }
 }

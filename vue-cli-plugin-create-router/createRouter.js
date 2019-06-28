@@ -57,17 +57,17 @@ module.exports = class CreateRouter {
             watch.createMonitor(path.join(this.options.cwd, this.options.projectPath.replace(/\/$/g, '')), {
                 interval: 2
             }, monitor => {
-                this.pageOptions.watch && monitor.on("created", p => process.nextTick(() => {
+                this.pageOptions.watch && monitor.on("created", p => {
                     /.vue$/g.test(p) && this.run();
-                }))
+                })
 
-                monitor.on("changed", p => process.nextTick(() => {
+                monitor.on("changed", p => {
                     /.vue$/g.test(p) && this.getPageInfo(p).watch && this.run();
-                }))
+                })
     
-                this.pageOptions.watch && monitor.on("removed", p => process.nextTick(() => {
+                this.pageOptions.watch && monitor.on("removed", p => {
                     /.vue$/g.test(p) && this.run();
-                }))
+                })
             })
         }
     }
@@ -89,7 +89,7 @@ module.exports = class CreateRouter {
 
         return this.createRoutes(files)
     }
-     
+    
     getPageInfo (p) {
         const pageFile = this.resolveFile(p, { cwd: this.options.cwd })
         const pageTemplate = vueTemplate.parseComponent(pageFile)
@@ -311,7 +311,7 @@ module.exports = class CreateRouter {
                 if(err) {
                     console.log(`  - writeFile: ${ chalk.red(err)}`);
                 } else {
-                    console.log('  Router running at:')
+                    console.log('  Router generate at:')
                     console.log(`  - ${ fileName }:`, ` ${ chalk.cyan(path.join(dirname, fileName))}`)
                 }
             });  

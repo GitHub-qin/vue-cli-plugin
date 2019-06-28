@@ -25,7 +25,7 @@
 
   ```
   ## 注
-  create-router 插件对 vue-cli-service serve 增加了 --watch 模式
+  create-router 插件对 vue-cli-service serve 增加了 --watch 监听模式
   可以运行 npx vue-cli-service help serve 查看所有选项
   如有需要，可以监听模式运行 serve 服务，监听 projectPath 目录下文件的 created，removed，changed
   ```

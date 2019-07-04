@@ -55,7 +55,7 @@ module.exports = class CreateRouter {
 
         if(process.env.NODE_ENV !== 'production') {
             watch.createMonitor(path.join(this.options.cwd, this.options.projectPath.replace(/\/$/g, '')), {
-                interval: 2
+                interval: 1
             }, monitor => {
                 this.pageOptions.watch && monitor.on("created", p => {
                     /.vue$/g.test(p) && this.run();
@@ -110,8 +110,8 @@ module.exports = class CreateRouter {
     createRoutes (files) {
         const routes = [];
         const requireComponent = [];
-
-        requireComponent.push(`/* 此代码自动生成 \n * date ${ this.getDate() } \n*/\n`)
+        requireComponent.push(`/* 此代码自动生成，手动修改将被覆盖 \n * date ${ this.getDate() } \n*/\n`)
+        requireComponent.push(`import Vue from 'vue' \nimport Router from 'vue-router' \nVue.use(Router) \n`)
         files.forEach(file => {
             const keys = file.page
                 .replace(RegExp(`^${ this.options.rootPath }`), '')
@@ -120,7 +120,7 @@ module.exports = class CreateRouter {
                 .split('/')
                 .slice(1)
             
-            const pageName = `${ this.camelCase(this.options.rootPath + '-' + keys.join('-').replace(/[_|-|.]/g, '')) }`
+            const pageName = `${ this.camelCase(keys.join('-').replace(/[_\-\.]/g, '')) }`
             const pagePath = `@/${ this.options.rootPath }/${ keys.join('/')}`
             const note = file.info.note ? `// ${ file.info.note } \n` : ''
 
@@ -350,10 +350,12 @@ module.exports = class CreateRouter {
                 content += `${res}\n`
             });
     
-            content += `\nexport default ${JSON.stringify(res.routes, null, 2)}`
+            content += `const router = ${JSON.stringify(res.routes, null, 2)}`
                 .replace(/"component": "(\w+?)"/g, `"component": $1`)
                 .replace(/"beforeEnter": "(.*)"/gm, `"beforeEnter": $1`)
                 .replace(/"(\w+?)":/g, '$1:')
+
+            content += `\n\nexport default new Router({ routes: router })`
     
             const dirname = path.resolve(this.options.cwd, './router')
             const fileName = `${ this.options.outputFileName }.js`

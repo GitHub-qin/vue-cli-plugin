@@ -31,7 +31,7 @@
   ```
 
 ## 配置
-默认配置基本可以满足日常需求，如需更改可以通过 `vue.config.js` 中的 `pluginOptions.createRouterConfig` 进行配置
+可以通过 `vue.config.js` > `pluginOptions.createRouterConfig` 进行配置
 
 ``` js
 // vue.config.js
@@ -75,7 +75,7 @@ module.exports = {
 推荐使用 **`<router-config>`** 标签来配置动态路由
 
 使用 **`<router-config>`** 标签
-默认配置基本可以满足日常需求，如需更改可以通过每个页面灵活单独配置，更多路由介绍请查看 [vue-router 官网](https://router.vuejs.org/zh/)
+可以对每个页面路由单独配置，更多路由介绍请查看 [vue-router 官网](https://router.vuejs.org/zh/)
 ```
 # views/layout.vue
 <router-config>
@@ -163,14 +163,8 @@ export default [
 // main.js
 import Vue from 'vue'
 import App from './App.vue'
-import Router from 'vue-router'
-Vue.use(Router)
 
-import router from '@/router'
-
-router = new Router({
-  routes: router
-})
+import router from '@/router' // @：src
 
 new Vue({
   router,

@@ -12,8 +12,9 @@ module.exports = class CreateRouter {
 
         // global router config
         this.options = {
-            async: false,
-            watch: false,
+            async: true,
+            watch: true,
+            changeWatch: true,
             cwd: path.resolve(process.cwd(), './src'),
             projectPath: 'views',
             outputFileName: 'index',
@@ -25,6 +26,7 @@ module.exports = class CreateRouter {
         this.pageOptions = {
             note: '',
             watch: this.options.watch,
+            changeWatch: options.changeWatch != null ? this.options.changeWatch : this.options.watch,
             async: this.options.async,
             name: '',
             path: '',
@@ -62,7 +64,7 @@ module.exports = class CreateRouter {
                 })
 
                 monitor.on("changed", p => {
-                    /.vue$/g.test(p) && this.getPageInfo(p).watch && this.run();
+                    /.vue$/g.test(p) && this.getPageInfo(p).changeWatch && this.run();
                 })
     
                 this.pageOptions.watch && monitor.on("removed", p => {
@@ -350,7 +352,7 @@ module.exports = class CreateRouter {
                 content += `${res}\n`
             });
     
-            content += `const router = ${JSON.stringify(res.routes, null, 2)}`
+            content += `const router = ${JSON.stringify(res.routes, null, 4)}`
                 .replace(/"component": "(\w+?)"/g, `"component": $1`)
                 .replace(/"beforeEnter": "(.*)"/gm, `"beforeEnter": $1`)
                 .replace(/"(\w+?)":/g, '$1:')

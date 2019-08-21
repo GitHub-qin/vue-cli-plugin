@@ -44,10 +44,12 @@ module.exports = {
           projectPath: `views`,
           // 生成路由文件的名称（默认: index）
           outputFileName: 'index'
-          // 开启路由异步模式（默认: false）
+          // 开启路由异步模式（默认: true）
           async: true,
-          // 以监听模式运行 serve 服务，监听 projectPath 目录下文件的 created，removed，changed （默认: false）
-          watch: true
+          // 以监听模式运行 serve 服务，监听 projectPath 目录下文件的 created，removed，changed （默认: true）
+          watch: true,
+          // 以监听模式运行 serve 服务，监听 projectPath 目录下文件的 changed （默认: true）
+          changeWatch: true
       }
    }
 }
@@ -82,10 +84,12 @@ module.exports = {
 {
     // 注释说明文字
     note: 'Layout 页面',
-    // 开启路由异步模式（默认: false）
+    // 开启路由异步模式（默认: true）
     async: true,
-    // 监听当前页面内容的 changed （默认: false）
+    // 监听 projectPath 目录下文件的 created，removed，changed （默认: true）
     watch: true,
+    // 监听当前页面内容的 changed （默认: true）
+    changeWatch: true,
 
     // 以下参数请参考 vue-router 官网
     path: '/',
@@ -124,12 +128,16 @@ export default {
 启动项目后生成文件`router/index.js`
 
 ```
+import Vue from 'vue' 
+import Router from 'vue-router' 
+Vue.use(Router) 
+
 // Layout 页面
 const viewsLayout = () => import('@/views/layout')
 import viewsLayoutHome from '@/views/layout/home'
 import viewsLayoutId from '@/views/layout/_id'
 
-export default [
+const router = [
   {
     name: "layout",
     path: "/",
@@ -157,6 +165,8 @@ export default [
     }
   }
 ]
+
+export default new Router({ routes: router })
 ```
 
 ``` js

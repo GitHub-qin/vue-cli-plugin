@@ -43,7 +43,9 @@ module.exports = {
           // 项目页面地址（默认: views）
           projectPath: `views`,
           // 生成路由文件的名称（默认: index）
-          outputFileName: 'index'
+          outputFileName: 'index',
+          // 忽略的文件集（不被写入 router 配置）（默认：[]）
+          ignore: [],
           // 开启路由异步模式（默认: true）
           async: true,
           // 以监听模式运行 serve 服务，监听 projectPath 目录下文件的 created，removed，changed （默认: true）
@@ -63,9 +65,9 @@ module.exports = {
 ├─components
 ├─views
 │  ├─layout
-│  │   ├─_id.vue
 │  │   └─home.vue
-│  └─layout.vue
+│  └─layout.vue,
+│  └─login.vue,
 ├─router
 │  └─index.js
 └─store
@@ -73,17 +75,16 @@ module.exports = {
 
 创建内嵌子路由，你需要添加一个 vue 文件，同时添加一个与该文件同名的目录用来存放子视图组件
 
-另外在使用动态路由时，需要创建对应的以下划线作为前缀的 vue 文件或目录
-推荐使用 **`<router-config>`** 标签来配置动态路由
-
 使用 **`<router-config>`** 标签
-可以对每个页面路由单独配置，更多路由介绍请查看 [vue-router 官网](https://router.vuejs.org/zh/)
+可以对每个页面进行单独配置，并且会覆盖 createRouterConfig 中的全局配置，更多路由介绍请查看 [vue-router 官网](https://router.vuejs.org/zh/)
 ```
 # views/layout.vue
 <router-config>
 {
     // 注释说明文字
     note: 'Layout 页面',
+    // 是否忽略当前文件（写入 router 配置）（默认：false | true：忽略，false：不忽略）
+    ignore: true,
     // 开启路由异步模式（默认: true）
     async: true,
     // 监听 projectPath 目录下文件的 created，removed，changed （默认: true）
@@ -92,7 +93,7 @@ module.exports = {
     changeWatch: true,
 
     // 以下参数请参考 vue-router 官网
-    path: '/',
+    path: '/layout',
     alias: '',
     redirect: '',
     meta: {
@@ -133,37 +134,37 @@ import Router from 'vue-router'
 Vue.use(Router) 
 
 // Layout 页面
-const viewsLayout = () => import('@/views/layout')
-import viewsLayoutHome from '@/views/layout/home'
-import viewsLayoutId from '@/views/layout/_id'
+const layout = () => import('@/views/layout')
+import layoutHome from '@/views/layout/home'
+import login from '@/views/login'
 
 const router = [
-  {
-    name: "layout",
-    path: "/",
-    component: viewsLayout,
-    children: [
-      {
-        name: "home",
-        path: "home",
-        component: viewsLayoutHome
-      },
-      {
-        name: "id",
-        path: ":id?",
-        component: viewsLayoutId
-      }
-    ],
-    meta: {
-        requiresAuth: true
+    {
+        name: "/layout",
+        path: "/layout",
+        component: layout,
+        children: [
+        {
+            name: "/layout/home",
+            path: "home",
+            component: layoutHome
+        }
+        ],
+        meta: {
+            requiresAuth: true
+        },
+        redirect: {
+            name: "/test"
+        },
+        beforeEnter: function(to, from, next) {
+            next()
+        }
     },
-    redirect: {
-        name: "/test"
-    },
-    beforeEnter: function(to, from, next) {
-        next()
+    {
+        name: "/login",
+        path: "/login",
+        component: login
     }
-  }
 ]
 
 export default new Router({ routes: router })
@@ -181,4 +182,21 @@ new Vue({
   store,
   render: h => h(App)
 }).$mount('#app')
+```
+
+## 路由文件生成规则
+``` js
+路由 name 和 path 默认按照文件路径命名，例如 /layout/test1/test2/home
+{
+    name: "/layout/test1/test2/home",
+    path: "/layout/test1/test2/home",
+    component: layoutTest1Test2Home
+}
+```
+
+## 注意事项
+```
+[ ] { } # % $ ^ * + = - | ~ < > . , ? ! @ & ( ) : ; " & \\ @
+以上关键字命名的 vue 文件，会自动过滤掉关键字
+/layout/test1/test2/h@#$%~^&*ome = /layout/test1/test2/home
 ```

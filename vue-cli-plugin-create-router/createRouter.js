@@ -10,8 +10,11 @@ module.exports = class CreateRouter {
         options = (options.pluginOptions && options.pluginOptions.createRouterConfig) || ''
         // this.initOptions = options
 
+        this.pageRegExp = /[\[\]\{\}\#\%\$\^\*\+\=\-\|\~\<\>\.\,\?\!\@\&\(\)\:\;\"\&\\\@]/g;
+
         // global router config
         this.options = {
+            ignore: [],
             async: true,
             watch: true,
             changeWatch: true,
@@ -85,7 +88,11 @@ module.exports = class CreateRouter {
 
             if (/\.vue$/.test(p) || !files[key]) {
                 p =  p.replace(/('|")/g, '\\$1')
-                files.push({ page: p, info: this.getPageInfo(p) })
+
+                const pageInfo = this.getPageInfo(p)
+
+                const checkIgnore = this.options.ignore.some(v => RegExp(p.match(/[^/]+(?=\.vue)/g)[0], 'g').test(v.replace(/\.vue/g, '')));
+                (pageInfo.ignore != null ? !pageInfo.ignore : !checkIgnore) && files.push({ page: p, info: pageInfo });
             }
         })
 
@@ -122,13 +129,15 @@ module.exports = class CreateRouter {
                 .split('/')
                 .slice(1)
             
-            const pageName = `${ this.camelCase(keys.join('-').replace(/[_\-\.]/g, '')) }`
-            const pagePath = `@/${ this.options.rootPath }/${ keys.join('/')}`
+            const pageName = `${ this.camelCase(keys.join('-')) }`.replace(this.pageRegExp, '')
+            const pagePath = `@/${ this.options.rootPath }/${ keys.join('/') }`
             const note = file.info.note ? `// ${ file.info.note } \n` : ''
 
             const route = {
                 name: '',
                 path: '',
+                pageName,
+                pagePath: `/${ keys.join('/') }`.replace(this.pageRegExp, ''),
                 customName: file.info.name,
                 customPath: file.info.path,
                 customMeta: file.info.meta,
@@ -147,8 +156,7 @@ module.exports = class CreateRouter {
                 route.name = key.startsWith('_') ? key.substr(1) : key
                 route.name += key === '_' ? 'all' : ''
                 const child = parent.find(parentRoute => parentRoute.name === route.name);
-    
-         
+
                 if (child) {
                     child.children = child.children || []
                     parent = child.children
@@ -273,21 +281,25 @@ module.exports = class CreateRouter {
                 route.path = (isChild ? '' : '/') + paths.join('/')
             }
 
-            route.name = route.name.replace(/-index$/, '')
+            route.name = route.path = route.pagePath
             route.customName && (route.name = route.customName)
             route.customPath && (route.path = route.customPath)
             route.customMeta && (route.meta = route.customMeta)
             route.customAlias && (route.alias = route.customAlias)
             route.customRedirect && (route.redirect = route.customRedirect)
             route.customBeforeEnter && (route.beforeEnter = route.customBeforeEnter)
-            delete route.customName; delete route.customPath; delete route.customMeta; delete route.customAlias; delete route.customRedirect; delete route.customBeforeEnter
-
+            
             if (route.children) {
                 if (route.children.find(child => child.path === '')) {
                     delete route.name
                 }
                 route.children = this.cleanChildrenRoutes(route.children, true)
+                
+                const renamePath = JSON.stringify(route.children).replace(RegExp(`"path"\\s*:\\s*.${ route.pagePath }/`, 'g'), '"path": "');
+                route.children = JSON.parse(renamePath);
             }
+
+            delete route.pageName; delete route.pagePath; delete route.customName; delete route.customPath; delete route.customMeta; delete route.customAlias; delete route.customRedirect; delete route.customBeforeEnter
         })
         return routes
     }
@@ -360,7 +372,7 @@ module.exports = class CreateRouter {
             content += `\n\nexport default new Router({ routes: router })`
     
             const dirname = path.resolve(this.options.cwd, './router')
-            const fileName = `${ this.options.outputFileName }.js`
+            const fileName = `${ this.options.outputFileName || 'index' }.js`
     
             this.writeFile(dirname, fileName, content)
         }).catch(error => {

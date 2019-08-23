@@ -10,8 +10,6 @@ module.exports = class CreateRouter {
         options = (options.pluginOptions && options.pluginOptions.createRouterConfig) || ''
         // this.initOptions = options
 
-        this.pageRegExp = /[\[\]\{\}\#\%\$\^\*\+\=\-\|\~\<\>\.\,\?\!\@\&\(\)\:\;\"\&\\\@]/g;
-
         // global router config
         this.options = {
             ignore: [],
@@ -38,6 +36,9 @@ module.exports = class CreateRouter {
             redirect: '',
             beforeEnter: ''
         }
+
+        this.pageRegExp = /[\[\]\{\}\#\%\$\^\*\+\=\-\|\~\<\>\.\,\?\!\@\&\(\)\:\;\"\&\\\@]/g;
+        this.cacheFile = {};
 
         // add router-loader
         api.chainWebpack(config => {
@@ -67,7 +68,12 @@ module.exports = class CreateRouter {
                 })
 
                 monitor.on("changed", p => {
-                    /.vue$/g.test(p) && this.getPageInfo(p).changeWatch && this.run();
+
+                    const info = this.getPageInfo(p);
+                    if(/.vue$/g.test(p) && info.changeWatch) {
+                        const checkUpdate = this.cacheFile[encodeURIComponent(p)] == JSON.stringify(info);
+                        !checkUpdate && this.run();
+                    }
                 })
     
                 this.pageOptions.watch && monitor.on("removed", p => {
@@ -75,9 +81,11 @@ module.exports = class CreateRouter {
                 })
             })
         }
+
+        this.getFile().then(files => this.cacheFileUpdate(files))
     }
 
-    async createRoutesFiles () {
+    async getFile () {
         const files = [];
     
         (await globby(`${ this.options.projectPath.replace(/\/$/g, '') }/**/*.vue`, {
@@ -92,11 +100,11 @@ module.exports = class CreateRouter {
                 const pageInfo = this.getPageInfo(p)
 
                 const checkIgnore = this.options.ignore.some(v => RegExp(p.match(/[^/]+(?=\.vue)/g)[0], 'g').test(v.replace(/\.vue/g, '')));
-                (pageInfo.ignore != null ? !pageInfo.ignore : !checkIgnore) && files.push({ page: p, info: pageInfo });
+                (pageInfo.ignore != null ? !pageInfo.ignore : !checkIgnore) && files.push({ page: p, fullPath: path.resolve(this.options.cwd, p), info: pageInfo });
             }
-        })
+        });
 
-        return this.createRoutes(files)
+        return files
     }
     
     getPageInfo (p) {
@@ -178,6 +186,12 @@ module.exports = class CreateRouter {
             'routes': this.cleanChildrenRoutes(routes),
             'requireComponent': requireComponent
         }
+    }
+
+    cacheFileUpdate (files) {
+        files.length && files.forEach(v => {
+            this.cacheFile[encodeURIComponent(v.fullPath)] = JSON.stringify(v.info);
+        })
     }
     
     getRoutePathExtension (key) {
@@ -358,8 +372,13 @@ module.exports = class CreateRouter {
             return
         }
         */
-        this.createRoutesFiles().then(res => {
-            let content = ''
+
+        this.getFile().then(files => {
+            this.cacheFileUpdate(files);
+            
+            let res = this.createRoutes(files);
+            let content = '';
+
             res.requireComponent.forEach(res => {
                 content += `${res}\n`
             });

@@ -50,7 +50,7 @@ module.exports = {
           async: true,
           // 以监听模式运行 serve 服务，监听 projectPath 目录下文件的 created，removed，changed （默认: true）
           watch: true,
-          // 以监听模式运行 serve 服务，监听 projectPath 目录下文件的 changed （默认: true）
+          // 以监听模式运行 serve 服务，监听 projectPath 目录下文件的 changed （默认: watch 的值）
           changeWatch: true
       }
    }
@@ -87,9 +87,7 @@ module.exports = {
     ignore: true,
     // 开启路由异步模式（默认: true）
     async: true,
-    // 监听 projectPath 目录下文件的 created，removed，changed （默认: true）
-    watch: true,
-    // 监听当前页面内容的 changed （默认: true）
+    // 监听当前页面内容的 changed （默认: watch 的值）
     changeWatch: true,
 
     // 以下参数请参考 vue-router 官网
@@ -195,6 +193,11 @@ new Vue({
 ```
 
 ## 注意事项
+```
+默认 <route-config> 标签的内容发生改变后自动触发更新路由配置文件.
+可以在 createRouterConfig 全局或者单个文件上设置 changeWatch：true | false 开启或关闭.
+```
+
 ```
 [ ] { } # % $ ^ * + = - | ~ < > . , ? ! @ & ( ) : ; " & \\ @
 以上关键字命名的 vue 文件，会自动过滤掉关键字

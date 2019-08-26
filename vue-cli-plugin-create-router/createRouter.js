@@ -8,7 +8,6 @@ const vueTemplate = require('vue-template-compiler')
 module.exports = class CreateRouter {
     constructor (api, options) {
         options = (options.pluginOptions && options.pluginOptions.createRouterConfig) || ''
-        // this.initOptions = options
 
         // global router config
         this.options = {
@@ -30,7 +29,7 @@ module.exports = class CreateRouter {
             changeWatch: options.changeWatch != null ? this.options.changeWatch : this.options.watch,
             async: this.options.async,
             name: '',
-            path: '',
+            path: null,
             meta: '',
             alias: '',
             redirect: '',
@@ -71,8 +70,7 @@ module.exports = class CreateRouter {
 
                     const info = this.getPageInfo(p);
                     if(/.vue$/g.test(p) && info.changeWatch) {
-                        const checkUpdate = this.cacheFile[encodeURIComponent(p)] == JSON.stringify(info);
-                        !checkUpdate && this.run();
+                        this.checkCacheFile(p, info) && this.run();
                     }
                 })
     
@@ -83,6 +81,11 @@ module.exports = class CreateRouter {
         }
 
         this.getFile().then(files => this.cacheFileUpdate(files))
+    }
+
+    checkCacheFile (fluPath, info) {
+        const cacheFile = this.cacheFile[encodeURIComponent(fluPath)];
+        return (info.async != cacheFile.async) || (info.note != cacheFile.note) || (info.name != cacheFile.name) || (info.path != cacheFile.path) || (info.meta != cacheFile.meta) || (info.alias != cacheFile.alias) || (info.redirect != cacheFile.redirect) || (info.beforeEnter.toString() != cacheFile.beforeEnter.toString());
     }
 
     async getFile () {
@@ -135,24 +138,27 @@ module.exports = class CreateRouter {
                 .replace(/\.(vue|js)$/, '')
                 .replace(/\/{2,}/g, '/')
                 .split('/')
-                .slice(1)
-            
+                .slice(1);
+
             const pageName = `${ this.camelCase(keys.join('-')) }`.replace(this.pageRegExp, '')
             const pagePath = `@/${ this.options.rootPath }/${ keys.join('/') }`
             const note = file.info.note ? `// ${ file.info.note } \n` : ''
+            const fullKeys = keys.map(v => `${ pageName }_${ v }`);
 
             const route = {
                 name: '',
                 path: '',
-                pageName,
-                pagePath: `/${ keys.join('/') }`.replace(this.pageRegExp, ''),
-                customName: file.info.name,
-                customPath: file.info.path,
-                customMeta: file.info.meta,
-                customRedirect: file.info.redirect,
-                customAlias: file.info.alias,
-                customBeforeEnter: `${ file.info.beforeEnter }`.replace(/\"/gm, "'").replace(/\r|\n|\t/gm, ''),
-                component: pageName
+                component: pageName,
+                custom: {
+                    pageName,
+                    pagePath: `/${ keys.join('/') }`.replace(this.pageRegExp, ''),
+                    customName: file.info.name,
+                    customPath: file.info.path,
+                    customMeta: file.info.meta,
+                    customRedirect: file.info.redirect,
+                    customAlias: file.info.alias,
+                    customBeforeEnter: `${ file.info.beforeEnter }`.replace(/\"/gm, "'").replace(/\r|\n|\t/gm, '')
+                }
             }
 
             file.info.async 
@@ -163,14 +169,15 @@ module.exports = class CreateRouter {
             keys.forEach((key, i) => {
                 route.name = key.startsWith('_') ? key.substr(1) : key
                 route.name += key === '_' ? 'all' : ''
-                const child = parent.find(parentRoute => parentRoute.name === route.name);
+                route.custom.fullKeys = fullKeys[i];
+                const child = parent.find(parentRoute => route.custom.fullKeys.split('_')[0].indexOf(parentRoute.custom.fullKeys.split('_')[0]) > -1 && parentRoute.custom.fullKeys.split('_')[1] == route.custom.fullKeys.split('_')[1]);
 
                 if (child) {
                     child.children = child.children || []
                     parent = child.children
                     route.path = ''
                 } else if (key === 'index' && i + 1 === keys.length) {
-                    route.path += i > 0 ? '' : '/'
+                    route.path += i > 0 ? '' : '/';
                 } else {
                     route.path = `/` + this.getRoutePathExtension(key)
     
@@ -190,7 +197,7 @@ module.exports = class CreateRouter {
 
     cacheFileUpdate (files) {
         files.length && files.forEach(v => {
-            this.cacheFile[encodeURIComponent(v.fullPath)] = JSON.stringify(v.info);
+            this.cacheFile[encodeURIComponent(v.fullPath)] = v.info;
         })
     }
     
@@ -295,25 +302,23 @@ module.exports = class CreateRouter {
                 route.path = (isChild ? '' : '/') + paths.join('/')
             }
 
-            route.name = route.path = route.pagePath
-            route.customName && (route.name = route.customName)
-            route.customPath && (route.path = route.customPath)
-            route.customMeta && (route.meta = route.customMeta)
-            route.customAlias && (route.alias = route.customAlias)
-            route.customRedirect && (route.redirect = route.customRedirect)
-            route.customBeforeEnter && (route.beforeEnter = route.customBeforeEnter)
-            
+            const custom = route.custom
+            route.name = route.path = custom.pagePath
+            custom.customName && (route.name = custom.customName)
+            custom.customPath != null && (route.path = custom.customPath)
+            custom.customMeta && (route.meta = custom.customMeta)
+            custom.customAlias && (route.alias = custom.customAlias)
+            custom.customRedirect && (route.redirect = custom.customRedirect)
+            custom.customBeforeEnter && (route.beforeEnter = custom.customBeforeEnter)
+
             if (route.children) {
-                if (route.children.find(child => child.path === '')) {
-                    delete route.name
-                }
                 route.children = this.cleanChildrenRoutes(route.children, true)
-                
-                const renamePath = JSON.stringify(route.children).replace(RegExp(`"path"\\s*:\\s*.${ route.pagePath }/`, 'g'), '"path": "');
+                // const renamePath = JSON.stringify(route.children).replace(RegExp(`"path"\\s*:\\s*.${ custom.pagePath }/`, 'g'), '"path": "').replace(/\/index"/g, '"').replace(/"index"/g, '""');
+                const renamePath = JSON.stringify(route.children).replace(RegExp(`"path"\\s*:\\s*.${ custom.pagePath }/`, 'g'), '"path": "');
                 route.children = JSON.parse(renamePath);
             }
-
-            delete route.pageName; delete route.pagePath; delete route.customName; delete route.customPath; delete route.customMeta; delete route.customAlias; delete route.customRedirect; delete route.customBeforeEnter
+            
+            delete route.custom;
         })
         return routes
     }
@@ -365,14 +370,6 @@ module.exports = class CreateRouter {
     }
 
     run () {
-        /*
-        if (!this.initOptions) {
-            console.log(`  - Set the ${chalk.cyan('pluginOptions > createRouterConfig')} parameter in ${chalk.cyan('vue.config.js')}`)
-            process.exit()
-            return
-        }
-        */
-
         this.getFile().then(files => {
             this.cacheFileUpdate(files);
             

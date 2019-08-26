@@ -83,11 +83,6 @@ module.exports = class CreateRouter {
         this.getFile().then(files => this.cacheFileUpdate(files))
     }
 
-    checkCacheFile (fluPath, info) {
-        const cacheFile = this.cacheFile[encodeURIComponent(fluPath)];
-        return (info.async != cacheFile.async) || (info.note != cacheFile.note) || (info.name != cacheFile.name) || (info.path != cacheFile.path) || (info.meta != cacheFile.meta) || (info.alias != cacheFile.alias) || (info.redirect != cacheFile.redirect) || (info.beforeEnter.toString() != cacheFile.beforeEnter.toString());
-    }
-
     async getFile () {
         const files = [];
     
@@ -199,6 +194,11 @@ module.exports = class CreateRouter {
         files.length && files.forEach(v => {
             this.cacheFile[encodeURIComponent(v.fullPath)] = v.info;
         })
+    }
+
+    checkCacheFile (fluPath, info) {
+        const cacheFile = this.cacheFile[encodeURIComponent(fluPath)];
+        return (info.async != cacheFile.async) || (info.note != cacheFile.note) || (info.name != cacheFile.name) || (info.path != cacheFile.path) || (info.meta != cacheFile.meta) || (info.alias != cacheFile.alias) || (info.redirect != cacheFile.redirect) || (info.beforeEnter.toString() != cacheFile.beforeEnter.toString());
     }
     
     getRoutePathExtension (key) {

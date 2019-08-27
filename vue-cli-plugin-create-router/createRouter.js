@@ -67,10 +67,9 @@ module.exports = class CreateRouter {
                 })
 
                 monitor.on("changed", p => {
-
-                    const info = this.getPageInfo(p);
-                    if(/.vue$/g.test(p) && info.changeWatch) {
-                        this.checkCacheFile(p, info) && this.run();
+                    if(/.vue$/g.test(p) && !this.checkIgnore(p)) {
+                        const info = this.getPageInfo(p);
+                        info.changeWatch && this.checkCacheFile(p, info) && this.run();
                     }
                 })
     
@@ -95,10 +94,10 @@ module.exports = class CreateRouter {
             if (/\.vue$/.test(p) || !files[key]) {
                 p =  p.replace(/('|")/g, '\\$1')
 
-                const pageInfo = this.getPageInfo(p)
-
-                const checkIgnore = this.options.ignore.some(v => RegExp(p.match(/[^/]+(?=\.vue)/g)[0], 'g').test(v.replace(/\.vue/g, '')));
-                (pageInfo.ignore != null ? !pageInfo.ignore : !checkIgnore) && files.push({ page: p, fullPath: path.resolve(this.options.cwd, p), info: pageInfo });
+                if(!this.checkIgnore(p)) {
+                    const pageInfo = this.getPageInfo(p);
+                    files.push({ page: p, fullPath: path.resolve(this.options.cwd, p), info: pageInfo });
+                }
             }
         });
 
@@ -197,8 +196,12 @@ module.exports = class CreateRouter {
     }
 
     checkCacheFile (fluPath, info) {
-        const cacheFile = this.cacheFile[encodeURIComponent(fluPath)];
+        const cacheFile = this.cacheFile[encodeURIComponent(fluPath)] || {};
         return (info.async != cacheFile.async) || (info.note != cacheFile.note) || (info.name != cacheFile.name) || (info.path != cacheFile.path) || (info.meta != cacheFile.meta) || (info.alias != cacheFile.alias) || (info.redirect != cacheFile.redirect) || (info.beforeEnter.toString() != cacheFile.beforeEnter.toString());
+    }
+
+    checkIgnore (page) {
+        return this.options.ignore.some(v => page.indexOf(`${ v.replace(/.vue/g, '') }.vue`) > -1)
     }
     
     getRoutePathExtension (key) {

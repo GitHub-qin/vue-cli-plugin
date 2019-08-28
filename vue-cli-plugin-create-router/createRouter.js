@@ -25,9 +25,9 @@ module.exports = class CreateRouter {
         // page router config
         this.pageOptions = {
             note: '',
+            async: this.options.async,
             watch: this.options.watch,
             changeWatch: options.changeWatch != null ? this.options.changeWatch : this.options.watch,
-            async: this.options.async,
             name: '',
             path: null,
             meta: '',
@@ -67,9 +67,9 @@ module.exports = class CreateRouter {
                 })
 
                 monitor.on("changed", p => {
-                    if(/.vue$/g.test(p) && !this.checkIgnore(p)) {
-                        const info = this.getPageInfo(p);
-                        info.changeWatch && this.checkCacheFile(p, info) && this.run();
+                    const pageInfo = this.getPageInfo(p);
+                    if(/.vue$/g.test(p) && pageInfo.changeWatch) {
+                        this.checkCacheFile(p, pageInfo) && this.run();
                     }
                 })
     
@@ -94,10 +94,7 @@ module.exports = class CreateRouter {
             if (/\.vue$/.test(p) || !files[key]) {
                 p =  p.replace(/('|")/g, '\\$1')
 
-                if(!this.checkIgnore(p)) {
-                    const pageInfo = this.getPageInfo(p);
-                    files.push({ page: p, fullPath: path.resolve(this.options.cwd, p), info: pageInfo });
-                }
+                files.push({ page: p, fullPath: path.resolve(this.options.cwd, p), info: this.getPageInfo(p) });
             }
         });
 
@@ -155,9 +152,13 @@ module.exports = class CreateRouter {
                 }
             }
 
-            file.info.async 
-            ? requireComponent.push(`${ note }const ${ pageName } = () => import('${ pagePath }')`) 
-            : requireComponent.push(`${ note }import ${ pageName } from '${ pagePath }'`)
+            const checkIgnore = (file.info.ignore != null ? !file.info.ignore : !this.checkIgnore(file.fullPath));
+
+            if(checkIgnore) {
+                file.info.async 
+                ? requireComponent.push(`${ note }const ${ pageName } = () => import('${ pagePath }')`) 
+                : requireComponent.push(`${ note }import ${ pageName } from '${ pagePath }'`)
+            }
 
             let parent = routes
             keys.forEach((key, i) => {
@@ -179,10 +180,13 @@ module.exports = class CreateRouter {
                         route.path += '?'
                     }
                 }
-            })
-            parent.push(route)
-        })
+            });
+
+            checkIgnore && parent.push(route)
+        });
+
         this.sortRoutes(routes)
+
         return {
             'routes': this.cleanChildrenRoutes(routes),
             'requireComponent': requireComponent
@@ -197,7 +201,7 @@ module.exports = class CreateRouter {
 
     checkCacheFile (fluPath, info) {
         const cacheFile = this.cacheFile[encodeURIComponent(fluPath)] || {};
-        return (info.async != cacheFile.async) || (info.note != cacheFile.note) || (info.name != cacheFile.name) || (info.path != cacheFile.path) || (info.meta != cacheFile.meta) || (info.alias != cacheFile.alias) || (info.redirect != cacheFile.redirect) || (info.beforeEnter.toString() != cacheFile.beforeEnter.toString());
+        return (info.ignore != cacheFile.ignore) || (info.async != cacheFile.async) || (info.note != cacheFile.note) || (info.name != cacheFile.name) || (info.path != cacheFile.path) || (info.meta != cacheFile.meta) || (info.alias != cacheFile.alias) || (info.redirect != cacheFile.redirect) || (info.beforeEnter.toString() != cacheFile.beforeEnter.toString());
     }
 
     checkIgnore (page) {

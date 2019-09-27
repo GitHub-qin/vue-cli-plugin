@@ -318,7 +318,10 @@ module.exports = class CreateRouter {
             custom.customRedirect && (route.redirect = custom.customRedirect)
             custom.customBeforeEnter && (route.beforeEnter = custom.customBeforeEnter)
 
+            console.log(route.children);
+
             if (route.children) {
+                delete route.name;
                 route.children = this.cleanChildrenRoutes(route.children, true)
                 // const renamePath = JSON.stringify(route.children).replace(RegExp(`"path"\\s*:\\s*.${ custom.pagePath }/`, 'g'), '"path": "').replace(/\/index"/g, '"').replace(/"index"/g, '""');
                 const renamePath = JSON.stringify(route.children).replace(RegExp(`"path"\\s*:\\s*.${ custom.pagePath }/`, 'g'), '"path": "');
@@ -384,7 +387,7 @@ module.exports = class CreateRouter {
             let content = '';
 
             res.requireComponent.forEach(res => {
-                content += `${res}\n`
+                content += `${res}\n\n`
             });
     
             content += `const router = ${JSON.stringify(res.routes, null, 4)}`

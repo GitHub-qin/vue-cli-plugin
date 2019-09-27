@@ -83,7 +83,7 @@ module.exports = {
 {
     // 注释说明文字
     note: 'Layout 页面',
-    // 是否忽略当前文件（写入 router 配置）（默认：false | true：忽略，false：不忽略）
+    // 是否忽略当前文件（写入 router 配置）（true：忽略，false：不忽略）
     ignore: false,
     // 开启路由异步模式（默认: true）
     async: true,

@@ -318,8 +318,6 @@ module.exports = class CreateRouter {
             custom.customRedirect && (route.redirect = custom.customRedirect)
             custom.customBeforeEnter && (route.beforeEnter = custom.customBeforeEnter)
 
-            console.log(route.children);
-
             if (route.children) {
                 delete route.name;
                 route.children = this.cleanChildrenRoutes(route.children, true)

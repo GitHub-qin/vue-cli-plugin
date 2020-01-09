@@ -115,7 +115,12 @@ export default {
     mounted() {
         this.$nextTick(() => {
             // 获取 <router-config> 标签的内容
-            console.log(this.$options._router)
+            console.log(this.$options._router);
+
+            // 使用 scrollBehavior
+            this.$router.scrollBehavior = function() {
+                ...
+            }
         });
     }
 }
@@ -174,6 +179,11 @@ import Vue from 'vue'
 import App from './App.vue'
 
 import router from '@/router' // @：src
+
+// 使用 scrollBehavior
+router.scrollBehavior = function() {
+    ...
+}
 
 new Vue({
   router,

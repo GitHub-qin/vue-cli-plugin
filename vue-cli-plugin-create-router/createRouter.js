@@ -121,8 +121,8 @@ module.exports = class CreateRouter {
     createRoutes (files) {
         const routes = [];
         const requireComponent = [];
-        requireComponent.push(`/* 此代码自动生成，手动修改将被覆盖 \n * date ${ this.getDate() } \n*/\n`)
-        requireComponent.push(`import Vue from 'vue' \nimport Router from 'vue-router' \nVue.use(Router) \n`)
+        requireComponent.push(`/* 此代码自动生成，手动修改将被覆盖 \n * date ${ this.getDate() } \n*/`)
+        requireComponent.push(`import Vue from 'vue' \nimport Router from 'vue-router' \nVue.use(Router)`)
         files.forEach(file => {
             const keys = file.page
                 .replace(RegExp(`^${ this.options.rootPath }`), '')
@@ -205,7 +205,7 @@ module.exports = class CreateRouter {
     }
 
     checkIgnore (page) {
-        return this.options.ignore.some(v => page.indexOf(`${ v.replace(/.vue/g, '') }.vue`) > -1)
+        return this.options.ignore.some(v => page.indexOf(`${ v.replace(/\.vue/g, '') }.vue`) > -1)
     }
     
     getRoutePathExtension (key) {
@@ -391,9 +391,9 @@ module.exports = class CreateRouter {
             content += `const router = ${JSON.stringify(res.routes, null, 4)}`
                 .replace(/"component": "(\w+?)"/g, `"component": $1`)
                 .replace(/"beforeEnter": "(.*)"/gm, `"beforeEnter": $1`)
-                .replace(/"(\w+?)":/g, '$1:')
+                .replace(/"(\w+?)":/g, '$1:');
 
-            content += `\n\nexport default new Router({ routes: router })`
+            content += `\n\nexport default new Router({\n    routes: router,\n    scrollBehavior(to, from, savedPosition) {\n        if (this.scrollBehavior) return this.scrollBehavior(to, from, savedPosition)\n    }\n})`;
     
             const dirname = path.resolve(this.options.cwd, './router')
             const fileName = `${ this.options.outputFileName || 'index' }.js`

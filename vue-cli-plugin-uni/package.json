@@ -1,0 +1,32 @@
+{
+  "name": "@xohu/vue-cli-plugin-uni",
+  "version": "1.0.0",
+  "description": "uni-app plugin for vue-cli 3",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xohu/vue-cli-plugin.git",
+    "directory": "vue-cli-plugin-uni"
+  },
+  "keywords": [
+    "vue",
+    "cli",
+    "plugin",
+    "vue-cli-plugin-uni"
+  ],
+  "author": "XoHu <zhuqinhu@qq.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/xohu/vue-cli-plugin/issues"
+  },
+  "homepage": "https://github.com/xohu/vue-cli-plugin/tree/master/vue-cli-plugin-uni#readme",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "uni-cli": "./bin/uni-cli.js"
+  },
+  "main": "index.js"
+}
